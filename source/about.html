@@ -1,63 +1,70 @@
-<link rel="stylesheet" href="css/about.css">
-<meta charset="UTF-8">
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>О НАС</title>
+  <link rel="stylesheet" href="css/about.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
 
-@@include('header.htm')
+<!-- Горизонтальное меню -->
+<header class="site-header">
+  <div class="container" style="display:flex; justify-content: space-between; align-items:center; padding: 20px 0;">
+    <div class="logo">
+      <a href="/" style="text-decoration:none; font-weight:bold; font-size:1.5rem; color:#007bff;">AnalizGO</a>
+    </div>
+    <nav class="main-nav">
+      <ul style="list-style:none; display:flex; gap:30px; margin:0; padding:0;">
+      
+        <li><a href="/about" class="active" style="text-decoration:none; color:#007bff;">О нас</a></li>
+        <li><a href="/appointments" style="text-decoration:none; color:#333;">Запись на приём</a></li>
+        <li><a href="/services" style="text-decoration:none; color:#333;">Услуги</a></li>
+        <li><a href="/contact" style="text-decoration:none; color:#333;">Контакты</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
 
-@@include('blocks/navigation.htm', {"about": "active"})
-
-@@include('blocks/page-title.htm',{"title":"О нас"})
+<!-- Заголовок страницы -->
+<section class="page-title" style="padding:40px 0; text-align:center; background-color:#f0f8ff;">
+  <div class="container">
+    <h1>О нас</h1>
+  </div>
+</section>
 
 <!-- Our Story / История клиники -->
-<section class="story" aria-labelledby="story-title" lang="ru">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-6">
-        <img loading="lazy" src="images/services/service-one.jpg" class="responsive" alt="Фотография клиники" />
-      </div>
+<section class="story" aria-labelledby="story-title" lang="ru" style="padding:60px 0;">
+  <div class="container" style="display:flex; flex-wrap:wrap; gap:40px;">
+    <div class="col-lg-6" style="flex:1 1 45%; display:flex; flex-direction:column; gap:50px;">
+  <img loading="lazy" src="images/services/service-one.jpg" class="responsive" alt="Фотография клиники" />
+  <img loading="lazy" src="images/services/service-six.jpg" class="responsive" alt="Описание" />
+</div>
 
-      <div class="col-lg-6">
-        <div class="story-content">
-          <h2 id="story-title">Наша история</h2>
+    <div class="col-lg-6" style="flex:1 1 45%;">
+      <div class="story-content">
+        <h2 id="story-title">Наша история</h2>
+        <blockquote class="tagline" aria-hidden="false">
+          «Наша миссия — сделать медицинские лабораторные результаты доступными и понятными каждому пациенту быстро, безопасно и удобно.»
+        </blockquote>
+        <p>Мы — студенты, работающие над стартапом, цель которого — внедрить современную онлайн-платформу для государственных больниц. Наша идея — создать удобный сайт, где пациенты смогут регистрироваться, получать уведомления о готовности лабораторных результатов и загружать/скачивать стандартизированные PDF-отчёты.</p>
 
-          <blockquote class="tagline" aria-hidden="false">
-            «Наша миссия — сделать медицинские лабораторные результаты доступными и понятными каждому пациенту
-            быстро, безопасно и удобно.»
-          </blockquote>
+        <h3>Ключевые преимущества</h3>
+        <ul>
+          <li>Безопасная регистрация и подтверждение по SMS.</li>
+          <li>Просмотр результатов онлайн и скачивание PDF отчётов.</li>
+          <li>Уведомления: SMS / Email (текст уведомления не содержит медицинских данных).</li>
+        </ul>
 
-          <p>
-            Мы — государственная клиника, внедряющая современную онлайн-платформу для просмотра лабораторных
-            результатов. Пациенты смогут регистрироваться, получать уведомления о готовности результатов и
-            загружать/скачивать стандартизированные PDF-отчёты.
-          </p>
+        <h4>Миссия</h4>
+        <p>Обеспечить своевременный и защищённый доступ пациентов к их медицинским результатам, снизив время ожидания и повысив прозрачность работы лабораторий.</p>
 
-          <h3>Ключевые преимущества</h3>
-          <ul>
-            <li>Безопасная регистрация и подтверждение по SMS.</li>
-            <li>Просмотр результатов онлайн и скачивание PDF отчётов.</li>
-            <li>Уведомления: SMS / Email (текст уведомления не содержит медицинских данных).</li>
-          </ul>
+        <h4>Видение</h4>
+        <p>Масштабируемая платформа, внедрённая во всех государственных больницах, с удобным интерфейсом для пожилых людей и полной системой аудита и защиты данных.</p>
 
-          <h4>Миссия</h4>
-          <p>
-            Обеспечить своевременный и защищённый доступ пациентов к их медицинским результатам, снизив время ожидания
-            и повысив прозрачность работы лабораторий.
-          </p>
-
-          <h4>Видение</h4>
-          <p>
-            Масштабируемая платформа, внедрённая во всех государственных больницах, с удобным интерфейсом для
-            пожилых людей и полной системой аудита и защиты данных.
-          </p>
-
-          <div class="cta-row" role="group" aria-label="Действия">
-            <a class="btn large-btn" href="/register" role="button" aria-label="Зарегистрироваться">
-              Зарегистрироваться
-            </a>
-            <a class="btn large-btn outline" href="/patient-login" role="button" aria-label="Войти как пациент">
-              Войти (Пациент)
-            </a>
-          </div>
-
+        <div class="cta-row" role="group" aria-label="Действия" style="margin-top:20px;">
+          <a class="btn large-btn" href="/register" role="button" aria-label="Зарегистрироваться">Зарегистрироваться</a>
+          <a class="btn large-btn outline" href="/patient-login" role="button" aria-label="Войти как пациент">Войти (Пациент)</a>
         </div>
       </div>
     </div>
@@ -67,42 +74,31 @@
 <!-- Promo Video -->
 <section class="promo-video" aria-labelledby="promo-title" lang="ru">
   <div class="container">
-    <div class="row">
-      <div class="col-lg-12">
-        <div class="block text-center">
-          <h6 id="promo-sub">О нашей платформе</h6>
-          <h1 id="promo-title">Качественное обслуживание — современными средствами</h1>
-
-          <a data-fancybox
-             href="https://www.youtube.com/watch?v=_sI_Ps7JSEk&amp;autoplay=1&amp;rel=0&amp;controls=0&amp;showinfo=0"
-             class="video-play"
-             aria-label="Посмотреть промо-ролик клиники — откроется в новом окне">
-            <i class="fas fa-play" aria-hidden="true"></i>
-            <span class="sr-only">Смотреть видео</span>
-          </a>
-
-        </div>
-      </div>
+    <div class="block text-center">
+      <h6 id="promo-sub">О нашей платформе</h6>
+      <h1 id="promo-title">Качественное обслуживание — современными средствами</h1>
+      <a data-fancybox href="https://www.youtube.com/watch?v=_sI_Ps7JSEk&amp;autoplay=1&amp;rel=0&amp;controls=0&amp;showinfo=0" class="video-play" aria-label="Посмотреть промо-ролик клиники">
+        <i class="fas fa-play" aria-hidden="true"></i>
+        <span class="sr-only">Смотреть видео</span>
+      </a>
     </div>
   </div>
 </section>
-
-@@include('blocks/gallery.htm')
 
 <!-- Features -->
 <section class="features section" aria-labelledby="features-title" lang="ru">
   <div class="container">
     <h2 id="features-title">Что вы получите</h2>
     <div class="row features-list">
-      <div class="col-md-4 feature-item" role="article" aria-labelledby="f1">
+      <div class="feature-item" role="article" aria-labelledby="f1">
         <h3 id="f1">Безопасность</h3>
         <p>Шифрование данных в канале и в хранилище</p>
       </div>
-      <div class="col-md-4 feature-item" role="article" aria-labelledby="f2">
+      <div class="feature-item" role="article" aria-labelledby="f2">
         <h3 id="f2">Удобство</h3>
         <p>Удобный веб-интерфейс с крупными элементами и понятной навигацией — результат за 2–3 клика.</p>
       </div>
-      <div class="col-md-4 feature-item" role="article" aria-labelledby="f3">
+      <div class="feature-item" role="article" aria-labelledby="f3">
         <h3 id="f3">PDF отчёты</h3>
         <p>Стандартизированные PDF с логотипом больницы, таблицей анализов и QR-кодом для верификации.</p>
       </div>
@@ -110,20 +106,10 @@
   </div>
 </section>
 
-<!-- Contact -->
-<section class="appoinment-section section" aria-labelledby="contact-title" lang="ru">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-6">
-        @@include('blocks/accordions.htm')
-      </div>
-      <div class="col-lg-6">
-        @@include('blocks/contact-area.htm')
-      </div>
-    </div>
-  </div>
-</section>
+<!-- Footer -->
+<footer>
+  <p>© 2025 AnalizGO. Все права защищены.</p>
+</footer>
 
-@@include('blocks/footer.htm')
-
-@@include('footer.htm')
+</body>
+</html>

@@ -26,6 +26,17 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
 }
 
+/* Специальный стиль для заголовка страницы "О нас" */
+.page-title h1 {
+  text-transform: uppercase; /* все буквы заглавные */
+  font-size: 3rem;           /* увеличенный размер текста */
+  font-weight: 700;           /* жирный текст */
+  color: #007bff;            /* синий цвет */
+  letter-spacing: 2px;       /* расстояние между буквами */
+  text-align: center;
+  margin-bottom: 0;
+}
+
 /* Абзацы */
 p {
   margin-bottom: 15px;
@@ -58,37 +69,36 @@ p {
   border-radius: 4px;
 }
 
-/* Кнопки */
+/* Кнопки - современный стиль */
 .btn {
   display: inline-block;
-  padding: 12px 30px;
-  border-radius: 30px;
-  font-weight: 500;
+  padding: 14px 40px;
+  border-radius: 50px;
+  font-weight: 600;
   text-decoration: none;
-  transition: all 0.3s ease;
-  cursor: pointer;
   text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
+/* Основная кнопка - Зарегистрироваться */
 .btn.large-btn {
-  background-color: #007bff;
+  background: linear-gradient(135deg, #007bff, #00aaff);
   color: #fff;
-  margin-right: 15px;
+  border: none;
 }
 
 .btn.large-btn:hover {
-  background-color: #0056b3;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
 
+/* Кнопка с обводкой - Войти */
 .btn.outline {
-  border: 2px solid #007bff;
-  color: #007bff;
-  background-color: transparent;
-}
-
-.btn.outline:hover {
-  background-color: #007bff;
+  background: linear-gradient(135deg, #007bff, #00aaff);
   color: #fff;
+  border: none;
 }
 
 /* Promo video секция */
@@ -97,15 +107,29 @@ p {
   text-align: center;
   padding: 80px 20px;
   border-radius: 12px;
-  margin: 50px 0;
+  margin: 100px 0;
   box-shadow: 0 5px 20px rgba(0,0,0,0.05);
 }
 
-.promo-video h1 {
-  font-size: 2.5rem;
-  margin-bottom: 20px;
+/* Фраза "О нашей платформе" */
+.promo-video h6#promo-sub {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #007bff;
+  margin-bottom: 15px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
+/* Заголовок секции */
+.promo-video h1#promo-title {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  font-weight: 700;
+  color: #222;
+}
+
+/* Кнопка воспроизведения видео */
 .video-play {
   display: inline-block;
   font-size: 3rem;
@@ -149,14 +173,6 @@ p {
 
 .feature-item p {
   color: #555;
-}
-
-/* Contact / Appoinment section */
-.appoinment-section {
-  background-color: #e9ecef;
-  padding: 60px 20px;
-  border-radius: 12px;
-  margin: 50px 0;
 }
 
 /* Footer */
