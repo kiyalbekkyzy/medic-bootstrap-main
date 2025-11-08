@@ -1,7 +1,7 @@
 /* Общие стили */
 body {
     font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    color: #1a1a1a; /* текст тёмно-серый для контраста */
+    color: #1a1a1a; /* тёмно-серый текст */
     line-height: 1.6;
     background-color: #ffffff; /* белый фон страницы */
 }
@@ -9,7 +9,28 @@ body {
 /* Секция записи на приём */
 .appointment-section {
     padding: 80px 0;
-    background-color: #f0f8ff; /* очень светлый голубой фон для блока */
+    background-color: #f0f8ff; /* очень светлый голубой фон */
+}
+
+/* Контейнер с колонками */
+.appointment-section .container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* центрируем по горизонтали */
+    align-items: flex-start;
+    gap: 40px; /* расстояние между колонками */
+}
+
+/* Левая колонка (форма) */
+.appointment-section .contact-area {
+    flex: 1 1 500px; /* минимальная ширина 500px */
+    max-width: 600px; /* максимум 600px */
+}
+
+/* Правая колонка (изображение) */
+.appointment-section .appointment-image-holder {
+    flex: 1 1 400px; /* минимальная ширина 400px */
+    max-width: 500px; /* максимум 500px */
 }
 
 /* Заголовки секции */
@@ -85,6 +106,16 @@ body {
 @media (max-width: 991px) {
     .appointment-section {
         padding: 50px 20px;
+    }
+    
+    .appointment-section .container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .appointment-section .contact-area,
+    .appointment-section .appointment-image-holder {
+        max-width: 90%; /* чтобы колонки не были слишком широкими */
     }
     
     .section-title h3 {
