@@ -21,7 +21,6 @@
         <li><a href="appointment.html" class="active">Получить результаты</a></li>
         <li><a href="service.html">Услуги</a></li>
         <li><a href="contact.html">Контакты</a></li>
-
       </ul>
     </nav>
   </div>
@@ -40,13 +39,13 @@
           <p>Заполните форму и получите подтверждение на Email или SMS.</p>
         </div>
 
-        <form>
-          <input class="form-control" type="text" placeholder="ФИО" required>
-          <input class="form-control" type="email" placeholder="Email" required>
-          <input class="form-control" type="text" placeholder="Телефон" required>
-          <input class="form-control" type="text" placeholder="Дата приёма" required>
+        <form onsubmit="sendEmail(event)">
+          <input class="form-control" type="text" placeholder="ФИО" id="fio" required>
+          <input class="form-control" type="email" placeholder="Email" id="email" required>
+          <input class="form-control" type="text" placeholder="Телефон" id="phone" required>
+          <input class="form-control" type="text" placeholder="Дата приёма" id="date" required>
 
-          <select class="form-control" required>
+          <select class="form-control" id="analysis" required>
             <option value="">Выберите вид анализа</option>
             <option>Анализ крови</option>
             <option>Сахар</option>
@@ -56,20 +55,18 @@
             <option>УЗИ брюшной части</option>
           </select>
 
-          <select class="form-control" required>
+          <select class="form-control" id="doctor" required>
             <option value="">Выберите врача</option>
             <option>Абдукаарова Айганыш</option>
             <option>Кыйалбек кызы Жасмина</option>
             <option>Мадаминова Рисолат</option>
           </select>
 
-          <textarea class="form-control" placeholder="Сообщение (необязательно)"></textarea>
+          <textarea class="form-control" placeholder="Сообщение (необязательно)" id="message"></textarea>
 
           <button type="submit" class="btn large-btn">Отправить заявку на получение</button>
         </form>
       </div>
-
-      
 
     </div>
   </div>
@@ -78,6 +75,10 @@
 <footer>
   <p>© 2025 AnalizGO. Все права защищены.</p>
 </footer>
+
+<!-- JS: сначала библиотека, потом скрипт -->
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@2/dist/email.min.js"></script>
+<script src="js/email.js"></script>
 
 </body>
 </html>
