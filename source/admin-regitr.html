@@ -4,6 +4,18 @@
   <meta charset="UTF-8">
   <title>Регистрация больницы</title>
   <link rel="stylesheet" href="css/admin.css">
+  <style>
+    body{font-family:Arial, sans-serif; background:#f4f7fb; margin:0; padding:0;}
+    .admin-container{display:flex; justify-content:center; align-items:center; min-height:100vh;}
+    .form-box{background:#fff; padding:24px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.1); width:400px;}
+    .form-box h2,h3{margin:12px 0;}
+    .form-box label{display:block; margin-top:10px; font-weight:500;}
+    .form-box input, .form-box button{width:100%; padding:8px 10px; margin-top:6px; border-radius:6px; border:1px solid #ccc; box-sizing:border-box;}
+    .form-box button{background:#0b72d9; color:#fff; border:none; cursor:pointer;}
+    .form-box button:hover{background:#095bb5;}
+    .form-box .switch{margin-top:12px; text-align:center;}
+    .form-box .switch a{color:#0b72d9; text-decoration:none;}
+  </style>
 </head>
 
 <body>
@@ -13,68 +25,65 @@
   <div class="form-box">
     <h2>Регистрация больницы</h2>
 
-    <form action="admin-dashboard.html" enctype="multipart/form-data">
+    <form id="registerForm" enctype="multipart/form-data">
 
       <h3>Данные больницы</h3>
 
       <label>Название больницы</label>
-      <input type="text" required placeholder="Введите название">
+      <input type="text" id="hospital-name" required placeholder="Введите название">
 
       <label>Город</label>
-      <input type="text" required placeholder="Город">
+      <input type="text" id="hospital-city" required placeholder="Город">
 
       <label>Район</label>
-      <input type="text" required placeholder="Район">
+      <input type="text" id="hospital-district" required placeholder="Район">
 
       <label>Полный адрес</label>
-      <input type="text" required placeholder="Введите адрес больницы">
+      <input type="text" id="hospital-address" required placeholder="Введите адрес больницы">
 
       <label>Контактный номер (для связи)</label>
-      <input type="tel" required placeholder="Введите телефон">
+      <input type="tel" id="hospital-phone" required placeholder="Введите телефон">
 
       <label>Email больницы</label>
-      <input type="email" required placeholder="Введите email">
+      <input type="email" id="hospital-email" required placeholder="Введите email">
 
       <label>ИНН больницы</label>
-      <input type="text" required placeholder="Введите ИНН">
-
+      <input type="text" id="hospital-inn" required placeholder="Введите ИНН">
 
       <h3>Ответственное лицо</h3>
 
       <label>ФИО</label>
-      <input type="text" required placeholder="Введите ФИО">
+      <input type="text" id="admin-name" required placeholder="Введите ФИО">
 
       <label>Номер телефона (с sms-подтверждением)</label>
-      <input type="tel" required placeholder="Введите номер телефона">
+      <input type="tel" id="admin-phone" required placeholder="Введите номер телефона">
 
       <label>ИНН</label>
-      <input type="text" required placeholder="ИНН ответственного">
+      <input type="text" id="admin-inn" required placeholder="ИНН ответственного">
 
       <label>Адрес проживания</label>
-      <input type="text" required placeholder="Введите адрес">
+      <input type="text" id="admin-address" required placeholder="Введите адрес">
 
       <label>Фото паспорта (передняя сторона)</label>
-      <input type="file" accept="image/*" required>
+      <input type="file" id="passport-front" accept="image/*" required>
 
       <label>Фото паспорта (задняя сторона)</label>
-      <input type="file" accept="image/*" required>
-
+      <input type="file" id="passport-back" accept="image/*" required>
 
       <h3>Больничные документы</h3>
 
       <label>Логотип больницы (PNG/JPEG)</label>
-      <input type="file" accept="image/png, image/jpeg">
+      <input type="file" id="hospital-logo" accept="image/png, image/jpeg">
 
       <label>Официальная печать больницы</label>
-      <input type="file" accept="image/png, image/jpeg" required>
-
+      <input type="file" id="hospital-seal" accept="image/png, image/jpeg" required>
 
       <h3>Создание пароля</h3>
 
       <label>Пароль администратора</label>
-      <input type="password" required placeholder="Введите пароль">
+      <input type="password" id="admin-password" required placeholder="Введите пароль">
 
-      <button class="btn" style="margin-top:20px;">Зарегистрировать</button>
+      <button type="submit">Зарегистрировать</button>
 
       <p class="switch">
         Уже есть аккаунт?  
@@ -85,6 +94,48 @@
   </div>
 
 </div>
+
+<script>
+document.getElementById('registerForm').addEventListener('submit', function(e){
+  e.preventDefault();
+
+  // Получаем данные
+  const hospital = {
+    name: document.getElementById('hospital-name').value,
+    city: document.getElementById('hospital-city').value,
+    district: document.getElementById('hospital-district').value,
+    address: document.getElementById('hospital-address').value,
+    phone: document.getElementById('hospital-phone').value,
+    email: document.getElementById('hospital-email').value,
+    inn: document.getElementById('hospital-inn').value,
+    logo: document.getElementById('hospital-logo').files[0] ? document.getElementById('hospital-logo').files[0].name : '',
+    seal: document.getElementById('hospital-seal').files[0].name
+  };
+
+  const admin = {
+    id: 'a'+Date.now(),
+    name: document.getElementById('admin-name').value,
+    phone: document.getElementById('admin-phone').value,
+    inn: document.getElementById('admin-inn').value,
+    address: document.getElementById('admin-address').value,
+    passportFront: document.getElementById('passport-front').files[0].name,
+    passportBack: document.getElementById('passport-back').files[0].name,
+    password: document.getElementById('admin-password').value,
+    hospital: hospital
+  };
+
+  // Сохраняем в localStorage
+  const admins = JSON.parse(localStorage.getItem('analizgo_admins') || '[]');
+  admins.push(admin);
+  localStorage.setItem('analizgo_admins', JSON.stringify(admins));
+
+  // Сохраняем текущую сессию
+  localStorage.setItem('analizgo_current_admin', JSON.stringify(admin));
+
+  // Перенаправляем на панель администратора
+  window.location.href = 'admin-dashboard.html';
+});
+</script>
 
 </body>
 </html>
