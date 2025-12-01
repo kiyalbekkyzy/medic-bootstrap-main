@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Регистрация больницы</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+
+<div class="admin-container">
+
+  <div class="form-box">
+    <h2>Регистрация больницы</h2>
+
+    <form action="admin-dashboard.html" enctype="multipart/form-data">
+
+      <h3>Данные больницы</h3>
+
+      <label>Название больницы</label>
+      <input type="text" required placeholder="Введите название">
+
+      <label>Город</label>
+      <input type="text" required placeholder="Город">
+
+      <label>Район</label>
+      <input type="text" required placeholder="Район">
+
+      <label>Полный адрес</label>
+      <input type="text" required placeholder="Введите адрес больницы">
+
+      <label>Контактный номер (для связи)</label>
+      <input type="tel" required placeholder="Введите телефон">
+
+      <label>Email больницы</label>
+      <input type="email" required placeholder="Введите email">
+
+      <label>ИНН больницы</label>
+      <input type="text" required placeholder="Введите ИНН">
+
+
+      <h3>Ответственное лицо</h3>
+
+      <label>ФИО</label>
+      <input type="text" required placeholder="Введите ФИО">
+
+      <label>Номер телефона (с sms-подтверждением)</label>
+      <input type="tel" required placeholder="Введите номер телефона">
+
+      <label>ИНН</label>
+      <input type="text" required placeholder="ИНН ответственного">
+
+      <label>Адрес проживания</label>
+      <input type="text" required placeholder="Введите адрес">
+
+      <label>Фото паспорта (передняя сторона)</label>
+      <input type="file" accept="image/*" required>
+
+      <label>Фото паспорта (задняя сторона)</label>
+      <input type="file" accept="image/*" required>
+
+
+      <h3>Больничные документы</h3>
+
+      <label>Логотип больницы (PNG/JPEG)</label>
+      <input type="file" accept="image/png, image/jpeg">
+
+      <label>Официальная печать больницы</label>
+      <input type="file" accept="image/png, image/jpeg" required>
+
+
+      <h3>Создание пароля</h3>
+
+      <label>Пароль администратора</label>
+      <input type="password" required placeholder="Введите пароль">
+
+      <button class="btn" style="margin-top:20px;">Зарегистрировать</button>
+
+      <p class="switch">
+        Уже есть аккаунт?  
+        <a href="admin-login.html">Войти</a>
+      </p>
+
+    </form>
+  </div>
+
+</div>
+
+</body>
+</html>

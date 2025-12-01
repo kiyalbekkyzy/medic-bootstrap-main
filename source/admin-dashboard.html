@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Панель администратора — AnalizGO</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root{--bg:#f4f7fb;--card:#fff;--primary:#0b72d9;--muted:#63748b}
+    body{margin:0; font-family:Inter, Arial, sans-serif; background:var(--bg); color:#10203a;}
+    header.appbar{display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:#fff; box-shadow:0 2px 6px rgba(16,32,58,.06);}
+    .app-title{display:flex; gap:12px; align-items:center}
+    .container{max-width:1100px; margin:20px auto; padding:0 16px}
+    .grid{display:flex; gap:20px; align-items:flex-start}
+    .sidebar{width:240px; background:var(--card); border-radius:10px; padding:12px; box-shadow:0 6px 18px rgba(11,24,40,0.04)}
+    .main{flex:1; background:var(--card); border-radius:10px; padding:18px; box-shadow:0 6px 18px rgba(11,24,40,0.04)}
+    .nav-item{padding:10px 12px; border-radius:8px; cursor:pointer; color:var(--muted); display:flex; gap:10px; align-items:center}
+    .nav-item.active{background:#eef6ff; color:var(--primary); font-weight:600}
+    .section-title{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px}
+    .form-row{display:flex; gap:10px; margin-bottom:10px}
+    input, select, textarea{padding:8px 10px; border:1px solid #e6eefc; border-radius:8px; font-size:14px; width:100%}
+    button.btn{padding:8px 12px; border-radius:8px; border:none; background:var(--primary); color:#fff; cursor:pointer}
+    button.ghost{background:transparent; border:1px solid #e6eefc; color:var(--muted);}
+    table{width:100%; border-collapse:collapse; margin-top:10px}
+    th, td{padding:8px 10px; border-bottom:1px solid #f1f5f9; text-align:left}
+    .small{font-size:13px; color:var(--muted)}
+    .chip{display:inline-block; padding:6px 8px; border-radius:8px; background:#f1f5f9; font-size:13px}
+    .subtabs{display:flex; gap:8px; margin-bottom:10px}
+    .subtab{padding:6px 10px; border-radius:8px; border:1px solid #e6eefc; cursor:pointer}
+    .subtab.active{background:var(--primary); color:#fff}
+    @media(max-width:880px){ .grid{flex-direction:column} .sidebar{width:100%} }
+  </style>
+</head>
+<body>
+  <header class="appbar">
+    <div class="app-title">
+      <strong>AnalizGO — Панель администратора</strong>
+      <span id="hospital-info" class="small"></span>
+    </div>
+    <div>
+      <button id="btn-logout" class="btn" title="Выйти"><i class="fa-solid fa-right-from-bracket"></i> Выйти</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="grid">
+      <aside class="sidebar" aria-label="Навигация администратора">
+        <div id="nav-accept" class="nav-item active"><i class="fa-solid fa-hand-holding-medical"></i> Прием анализа</div>
+        <div id="nav-upload" class="nav-item"><i class="fa-solid fa-upload"></i> Загрузить результаты</div>
+        <div id="nav-patients" class="nav-item"><i class="fa-solid fa-user-injured"></i> Пациенты</div>
+        <div id="nav-doctors" class="nav-item"><i class="fa-solid fa-user-doctor"></i> Врачи</div>
+        <div id="nav-results" class="nav-item"><i class="fa-solid fa-file-medical"></i> Результаты</div>
+      </aside>
+
+      <main class="main" role="main" aria-live="polite">
+        <!-- Прием анализа -->
+        <div id="view-accept" class="view active">
+          <div class="section-title">
+            <h3>Прием анализа</h3>
+            <span class="small">Добавляйте информацию о новых анализах пациента</span>
+          </div>
+          <div id="accept-form" style="margin-bottom:12px;">
+            <div class="form-row">
+              <select id="analysis-patient"><option value="">Выберите пациента</option></select>
+              <input id="analysis-type" placeholder="Тип анализа"/>
+            </div>
+            <div class="form-row">
+              <input type="date" id="analysis-date"/>
+              <input type="file" id="analysis-file"/>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:8px;">
+              <button id="save-analysis" class="btn">Сохранить</button>
+              <button id="cancel-analysis" class="btn ghost">Отмена</button>
+            </div>
+          </div>
+          <table id="accept-table">
+            <thead><tr><th>Пациент</th><th>Тип анализа</th><th>Дата</th><th>Файл</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <!-- Загрузить результаты -->
+        <div id="view-upload" class="view" style="display:none">
+          <div class="section-title">
+            <h3>Загрузить результаты</h3>
+            <span class="small">Ищите прием анализа и прикрепляйте готовый файл</span>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center; margin-bottom:12px;">
+            <input type="text" id="search-patient-upload" placeholder="Имя пациента"/>
+            <input type="date" id="search-date-upload"/>
+            <button id="search-upload-btn" class="btn">Найти</button>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center; margin-bottom:12px;">
+            <select id="upload-analysis-select"><option value="">Выберите прием</option></select>
+            <input type="file" id="upload-file"/>
+            <button id="upload-btn" class="btn">Загрузить</button>
+          </div>
+          <div id="upload-msg" class="small"></div>
+          <div style="margin-top:18px">
+            <h4>Список загруженных результатов</h4>
+            <table id="upload-table">
+              <thead><tr><th>Пациент</th><th>Файл</th><th>Статус</th><th>Дата</th><th>Действия</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Пациенты -->
+        <div id="view-patients" class="view" style="display:none">
+          <div class="section-title">
+            <h3>Пациенты</h3>
+            <div><button id="add-patient-btn" class="btn">Добавить пациента</button></div>
+          </div>
+          <div id="patient-form" style="display:none; margin-bottom:12px;">
+            <div class="form-row">
+              <input id="p-name" placeholder="ФИО"/>
+              <select id="p-sex"><option value="">Пол</option><option value="М">М</option><option value="Ж">Ж</option></select>
+            </div>
+            <div class="form-row">
+              <input id="p-nationality" placeholder="Национальность"/>
+              <input id="p-dob" placeholder="Дата рождения (YYYY-MM-DD)"/>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:8px;">
+              <button id="save-patient" class="btn">Сохранить</button>
+              <button id="cancel-patient" class="btn ghost">Отмена</button>
+            </div>
+          </div>
+          <table id="patients-table"><thead><tr><th>ФИО</th><th>Национальность</th><th>Пол</th><th>ДР</th><th>Действия</th></tr></thead><tbody></tbody></table>
+        </div>
+
+        <!-- Врачи -->
+        <div id="view-doctors" class="view" style="display:none">
+          <div class="section-title">
+            <h3>Врачи</h3>
+            <div><button id="add-doctor-btn" class="btn">Добавить врача</button></div>
+          </div>
+          <div id="doctor-form" style="display:none; margin-bottom:12px;">
+            <div class="form-row">
+              <input id="d-name" placeholder="ФИО"/>
+              <input id="d-specialty" placeholder="Специальность"/>
+              <select id="d-sex"><option value="">Пол</option><option value="М">М</option><option value="Ж">Ж</option></select>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:8px;">
+              <button id="save-doctor" class="btn">Сохранить</button>
+              <button id="cancel-doctor" class="btn ghost">Отмена</button>
+            </div>
+          </div>
+          <table id="doctors-table"><thead><tr><th>ФИО</th><th>Спец.</th><th>Пол</th><th>Действия</th></tr></thead><tbody></tbody></table>
+        </div>
+
+        <!-- Результаты -->
+        <div id="view-results" class="view" style="display:none">
+          <div class="section-title">
+            <h3>Результаты</h3>
+            <div class="subtabs" role="tablist">
+              <div id="sub-ready" class="subtab active">Готовые</div>
+              <div id="sub-pending" class="subtab">В процессе</div>
+            </div>
+          </div>
+          <table id="results-table"><thead><tr><th>Пациент</th><th>Файл</th><th>Врач</th><th>Статус</th><th>Дата</th><th>Действия</th></tr></thead><tbody></tbody></table>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const current = JSON.parse(localStorage.getItem('analizgo_current_admin') || 'null');
+      if(!current){ alert('Сначала войдите как администратор.'); window.location.href='admin-login.html'; return; }
+      const admins = JSON.parse(localStorage.getItem('analizgo_admins') || '[]');
+      const admin = admins.find(a=>a.id===current.id || a.email===current.email) || admins[0];
+      if(!admin){ alert('Админ не найден.'); localStorage.removeItem('analizgo_current_admin'); window.location.href='admin-login.html'; return; }
+      document.getElementById('hospital-info').textContent = admin.hospital? ' — '+admin.hospital.name : '';
+
+      function get(key){ return JSON.parse(localStorage.getItem(key)||'[]'); }
+      function set(key,val){ localStorage.setItem(key,JSON.stringify(val)); }
+
+      // Инициализация пустых массивов
+      if(!localStorage.getItem('analizgo_patients')) set('analizgo_patients',[]);
+      if(!localStorage.getItem('analizgo_doctors')) set('analizgo_doctors',[]);
+      if(!localStorage.getItem('analizgo_results')) set('analizgo_results',[]);
+      if(!localStorage.getItem('analizgo_analysis_accept')) set('analizgo_analysis_accept',[]);
+
+      const views = {
+        accept: document.getElementById('view-accept'),
+        upload: document.getElementById('view-upload'),
+        patients: document.getElementById('view-patients'),
+        doctors: document.getElementById('view-doctors'),
+        results: document.getElementById('view-results')
+      };
+
+      function showView(name){
+        Object.values(views).forEach(v=>v.style.display='none');
+        views[name].style.display='block';
+        document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+        document.getElementById('nav-'+name).classList.add('active');
+        if(name==='accept') renderAnalysisAccept();
+        if(name==='upload') renderAnalysisUpload();
+        if(name==='patients') renderPatients();
+        if(name==='doctors') renderDoctors();
+        if(name==='results') renderResults();
+      }
+
+      document.getElementById('nav-accept').addEventListener('click',()=>showView('accept'));
+      document.getElementById('nav-upload').addEventListener('click',()=>showView('upload'));
+      document.getElementById('nav-patients').addEventListener('click',()=>showView('patients'));
+      document.getElementById('nav-doctors').addEventListener('click',()=>showView('doctors'));
+      document.getElementById('nav-results').addEventListener('click',()=>showView('results'));
+      document.getElementById('btn-logout').addEventListener('click',()=>{localStorage.removeItem('analizgo_current_admin'); window.location.href='admin-login.html';});
+
+      // --- Пациенты ---
+      const addPatientBtn=document.getElementById('add-patient-btn');
+      const patientForm=document.getElementById('patient-form');
+      const savePatient=document.getElementById('save-patient');
+      const cancelPatient=document.getElementById('cancel-patient');
+      const patientsTableBody=document.querySelector('#patients-table tbody');
+
+      addPatientBtn.addEventListener('click',()=>patientForm.style.display='block');
+      cancelPatient.addEventListener('click',()=>{patientForm.style.display='none'; clearPatientForm();});
+      function clearPatientForm(){ document.getElementById('p-name').value=''; document.getElementById('p-nationality').value=''; document.getElementById('p-sex').value=''; document.getElementById('p-dob').value=''; }
+
+      savePatient.addEventListener('click',()=>{
+        const name=document.getElementById('p-name').value.trim();
+        const nat=document.getElementById('p-nationality').value.trim();
+        const sex=document.getElementById('p-sex').value;
+        const dob=document.getElementById('p-dob').value.trim();
+        if(!name){ alert('Введите имя пациента'); return; }
+        const patients=get('analizgo_patients');
+        const newP={id:'p'+Date.now(), name, nationality:nat, sex, dob};
+        patients.push(newP);
+        set('analizgo_patients',patients);
+        patientForm.style.display='none';
+        clearPatientForm();
+        renderPatients();
+      });
+
+      function renderPatients(){
+        const patients=get('analizgo_patients');
+        patientsTableBody.innerHTML='';
+        patients.forEach(p=>{
+          const tr=document.createElement('tr');
+          tr.innerHTML=`<td>${p.name}</td><td>${p.nationality||''}</td><td>${p.sex||''}</td><td>${p.dob||''}</td><td></td>`;
+          patientsTableBody.appendChild(tr);
+        });
+      }
+
+      // --- Врачи ---
+      const addDoctorBtn=document.getElementById('add-doctor-btn');
+      const doctorForm=document.getElementById('doctor-form');
+      const saveDoctor=document.getElementById('save-doctor');
+      const cancelDoctor=document.getElementById('cancel-doctor');
+      const doctorsTableBody=document.querySelector('#doctors-table tbody');
+
+      addDoctorBtn.addEventListener('click',()=>doctorForm.style.display='block');
+      cancelDoctor.addEventListener('click',()=>{doctorForm.style.display='none'; clearDoctorForm();});
+      function clearDoctorForm(){ document.getElementById('d-name').value=''; document.getElementById('d-specialty').value=''; document.getElementById('d-sex').value=''; }
+
+      saveDoctor.addEventListener('click',()=>{
+        const name=document.getElementById('d-name').value.trim();
+        const specialty=document.getElementById('d-specialty').value.trim();
+        const sex=document.getElementById('d-sex').value;
+        if(!name){ alert('Введите имя врача'); return; }
+        const doctors=get('analizgo_doctors');
+        const newD={id:'d'+Date.now(), name, specialty, sex};
+        doctors.push(newD);
+        set('analizgo_doctors',doctors);
+        doctorForm.style.display='none';
+        clearDoctorForm();
+        renderDoctors();
+      });
+
+      function renderDoctors(){
+        const doctors=get('analizgo_doctors');
+        doctorsTableBody.innerHTML='';
+        doctors.forEach(d=>{
+          const tr=document.createElement('tr');
+          tr.innerHTML=`<td>${d.name}</td><td>${d.specialty||''}</td><td>${d.sex||''}</td><td></td>`;
+          doctorsTableBody.appendChild(tr);
+        });
+      }
+
+      // --- Прием анализа ---
+      const analysisPatientSelect=document.getElementById('analysis-patient');
+      const analysisTypeInput=document.getElementById('analysis-type');
+      const analysisDateInput=document.getElementById('analysis-date');
+      const analysisFileInput=document.getElementById('analysis-file');
+      const saveAnalysisBtn=document.getElementById('save-analysis');
+      const cancelAnalysisBtn=document.getElementById('cancel-analysis');
+      const acceptTableBody=document.querySelector('#accept-table tbody');
+
+      function renderAnalysisAccept(){
+        const patients=get('analizgo_patients');
+        analysisPatientSelect.innerHTML='<option value="">Выберите пациента</option>';
+        patients.forEach(p=>{
+          const opt=document.createElement('option');
+          opt.value=p.id; opt.textContent=p.name;
+          analysisPatientSelect.appendChild(opt);
+        });
+
+        const accept=get('analizgo_analysis_accept');
+        acceptTableBody.innerHTML='';
+        accept.forEach(a=>{
+          const patient=(get('analizgo_patients')||[]).find(p=>p.id===a.patientId);
+          const tr=document.createElement('tr');
+          tr.innerHTML=`<td>${patient?patient.name:'—'}</td><td>${a.type}</td><td>${a.date}</td><td>${a.fileName||''}</td>`;
+          acceptTableBody.appendChild(tr);
+        });
+      }
+
+      cancelAnalysisBtn.addEventListener('click',()=>{
+        analysisPatientSelect.value=''; analysisTypeInput.value=''; analysisDateInput.value=''; analysisFileInput.value='';
+      });
+
+      saveAnalysisBtn.addEventListener('click',()=>{
+        const patientId=analysisPatientSelect.value;
+        const type=analysisTypeInput.value.trim();
+        const date=analysisDateInput.value;
+        const file=analysisFileInput.files[0];
+        if(!patientId || !type || !date){ alert('Заполните все поля'); return; }
+        const accept=get('analizgo_analysis_accept');
+        const newA={id:'a'+Date.now(), patientId, type, date, fileName:file?file.name:''};
+        accept.push(newA);
+        set('analizgo_analysis_accept',accept);
+        renderAnalysisAccept();
+        analysisPatientSelect.value=''; analysisTypeInput.value=''; analysisDateInput.value=''; analysisFileInput.value='';
+      });
+
+      // --- Загрузить результаты ---
+      const searchPatientInput=document.getElementById('search-patient-upload');
+      const searchDateInput=document.getElementById('search-date-upload');
+      const searchUploadBtn=document.getElementById('search-upload-btn');
+      const uploadAnalysisSelect=document.getElementById('upload-analysis-select');
+      const uploadFileInput=document.getElementById('upload-file');
+      const uploadBtnUpload=document.getElementById('upload-btn');
+      const uploadMsg=document.getElementById('upload-msg');
+      const uploadTableBody=document.querySelector('#upload-table tbody');
+
+      function renderAnalysisUpload(){
+        const accept=get('analizgo_analysis_accept');
+        uploadAnalysisSelect.innerHTML='<option value="">Выберите прием</option>';
+        accept.forEach(a=>{
+          const patient=(get('analizgo_patients')||[]).find(p=>p.id===a.patientId);
+          const opt=document.createElement('option');
+          opt.value=a.id; opt.textContent=patient?patient.name+' | '+a.date+' | '+a.type : '';
+          uploadAnalysisSelect.appendChild(opt);
+        });
+
+        const results=get('analizgo_results');
+        uploadTableBody.innerHTML='';
+        results.slice().reverse().forEach(r=>{
+          const patient=(get('analizgo_patients')||[]).find(p=>p.id===r.patientId);
+          const tr=document.createElement('tr');
+          tr.innerHTML=`<td>${patient?patient.name:'—'}</td><td>${r.fileName}</td><td>${r.status}</td><td>${r.date}</td><td><button onclick="window.open('${r.fileUrl||''}','_blank')" class="btn small-btn">Просмотр</button></td>`;
+          uploadTableBody.appendChild(tr);
+        });
+      }
+
+      searchUploadBtn.addEventListener('click',()=>{
+        const name=searchPatientInput.value.toLowerCase();
+        const date=searchDateInput.value;
+        const accept=get('analizgo_analysis_accept');
+        let filtered=accept.filter(a=>{
+          const patient=(get('analizgo_patients')||[]).find(p=>p.id===a.patientId);
+          return (!name || (patient&&patient.name.toLowerCase().includes(name))) &&
+                 (!date || a.date===date);
+        });
+        uploadAnalysisSelect.innerHTML='<option value="">Выберите прием</option>';
+        filtered.forEach(a=>{
+          const patient=(get('analizgo_patients')||[]).find(p=>p.id===a.patientId);
+          const opt=document.createElement('option');
+          opt.value=a.id; opt.textContent=patient?patient.name+' | '+a.date+' | '+a.type:'';
+          uploadAnalysisSelect.appendChild(opt);
+        });
+      });
+
+      uploadBtnUpload.addEventListener('click',()=>{
+        const analysisId=uploadAnalysisSelect.value;
+        const file=uploadFileInput.files[0];
+        if(!analysisId || !file){ uploadMsg.textContent='Выберите прием и файл'; return; }
+        const accept=get('analizgo_analysis_accept');
+        const analysis=accept.find(a=>a.id===analysisId);
+        const results=get('analizgo_results');
+        const newRes={id:'r'+Date.now(), patientId:analysis.patientId, doctorId:'', fileName:file.name, fileUrl:URL.createObjectURL(file), status:'ready', date:analysis.date};
+        results.push(newRes);
+        set('analizgo_results',results);
+        uploadMsg.textContent='Файл загружен';
+        renderAnalysisUpload();
+        uploadFileInput.value='';
+      });
+
+      // --- Результаты ---
+      const subReady=document.getElementById('sub-ready');
+      const subPending=document.getElementById('sub-pending');
+      const resultsTableBody=document.querySelector('#results-table tbody');
+
+      subReady.addEventListener('click',()=>{ subReady.classList.add('active'); subPending.classList.remove('active'); renderResults('ready'); });
+      subPending.addEventListener('click',()=>{ subPending.classList.add('active'); subReady.classList.remove('active'); renderResults('pending'); });
+
+      function renderResults(filter='ready'){
+        const results=get('analizgo_results');
+        const filtered=results.filter(r=>(filter==='ready'? r.status==='ready' : r.status!=='ready'));
+        resultsTableBody.innerHTML='';
+        filtered.slice().reverse().forEach(r=>{
+          const patient=(get('analizgo_patients')||[]).find(p=>p.id===r.patientId);
+          const tr=document.createElement('tr');
+          tr.innerHTML=`<td>${patient?patient.name:'—'}</td><td>${r.fileName}</td><td>${r.doctorId||''}</td><td>${r.status}</td><td>${r.date}</td><td><button onclick="window.open('${r.fileUrl||''}','_blank')" class="btn small-btn">Просмотр</button></td>`;
+          resultsTableBody.appendChild(tr);
+        });
+      }
+
+      // Стартовая загрузка
+      showView('accept');
+    })();
+  </script>
+</body>
+</html>
