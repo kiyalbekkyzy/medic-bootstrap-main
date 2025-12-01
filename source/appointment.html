@@ -43,7 +43,7 @@
           <input class="form-control" type="text" placeholder="ФИО" id="fio" required>
           <input class="form-control" type="email" placeholder="Email" id="email" required>
           <input class="form-control" type="text" placeholder="Телефон" id="phone" required>
-          <input class="form-control" type="text" placeholder="Дата приёма" id="date" required>
+          <input class="form-control" type="date" placeholder="Дата приёма" id="date" required>
 
           <select class="form-control" id="analysis" required>
             <option value="">Выберите вид анализа</option>
@@ -51,15 +51,17 @@
             <option>Сахар</option>
             <option>Почки</option>
             <option>Печень</option>
+            <option>Моча</option>
+            <option>ккал</option>
             <option>УЗИ малого таза</option>
             <option>УЗИ брюшной части</option>
           </select>
 
           <select class="form-control" id="doctor" required>
             <option value="">Выберите врача</option>
-            <option>Абдукаарова Айганыш</option>
-            <option>Кыйалбек кызы Жасмина</option>
-            <option>Мадаминова Рисолат</option>
+            <option>Доктор Абдукаарова Айганыш</option>
+            <option>Доктор Кыйалбек кызы Жасмина</option>
+            <option>Доктор Мадаминова Рисолат</option>
           </select>
 
           <textarea class="form-control" placeholder="Сообщение (необязательно)" id="message"></textarea>
@@ -78,7 +80,7 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@2/dist/email.min.js"></script>
-<script src="js/email.js"></script>
+<script src="javascript/email.js"></script>
 
 </body>
 </html>
