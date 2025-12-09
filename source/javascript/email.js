@@ -11,7 +11,7 @@ function sendEmail(event) {
     message: document.getElementById("message").value
   };
 
-  // ОТПРАВКА В PostgreSQL 
+ 
   fetch("http://localhost:3000/submit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
