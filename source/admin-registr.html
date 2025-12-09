@@ -17,98 +17,96 @@
     .form-box .switch a{color:#0b72d9; text-decoration:none;}
   </style>
 </head>
-
 <body>
 
 <div class="admin-container">
-
   <div class="form-box">
     <h2>Регистрация больницы</h2>
-
     <form id="registerForm" enctype="multipart/form-data">
 
       <h3>Данные больницы</h3>
-
       <label>Название больницы</label>
       <input type="text" id="hospital-name" required placeholder="Введите название">
-
       <label>Город</label>
       <input type="text" id="hospital-city" required placeholder="Город">
-
       <label>Район</label>
       <input type="text" id="hospital-district" required placeholder="Район">
-
       <label>Полный адрес</label>
       <input type="text" id="hospital-address" required placeholder="Введите адрес больницы">
-
       <label>Контактный номер (для связи)</label>
       <input type="tel" id="hospital-phone" required placeholder="Введите телефон">
-
       <label>Email больницы</label>
       <input type="email" id="hospital-email" required placeholder="Введите email">
-
       <label>ИНН больницы</label>
       <input type="text" id="hospital-inn" required placeholder="Введите ИНН">
 
       <h3>Ответственное лицо</h3>
-
       <label>ФИО</label>
       <input type="text" id="admin-name" required placeholder="Введите ФИО">
-
       <label>Номер телефона (с sms-подтверждением)</label>
       <input type="tel" id="admin-phone" required placeholder="Введите номер телефона">
-
       <label>ИНН</label>
       <input type="text" id="admin-inn" required placeholder="ИНН ответственного">
-
       <label>Адрес проживания</label>
       <input type="text" id="admin-address" required placeholder="Введите адрес">
-
       <label>Фото паспорта (передняя сторона)</label>
       <input type="file" id="passport-front" accept="image/*" required>
-
       <label>Фото паспорта (задняя сторона)</label>
       <input type="file" id="passport-back" accept="image/*" required>
 
       <h3>Больничные документы</h3>
-
       <label>Логотип больницы (PNG/JPEG)</label>
       <input type="file" id="hospital-logo" accept="image/png, image/jpeg">
-
       <label>Официальная печать больницы</label>
       <input type="file" id="hospital-seal" accept="image/png, image/jpeg" required>
 
       <h3>Создание пароля</h3>
-
       <label>Пароль администратора</label>
       <input type="password" id="admin-password" required placeholder="Введите пароль">
 
       <button type="submit">Зарегистрировать</button>
 
       <p class="switch">
-        Уже есть аккаунт?  
+        Уже есть аккаунт?
         <a href="admin-login.html">Войти</a>
       </p>
-
     </form>
   </div>
-
 </div>
 
 <script>
 document.getElementById('registerForm').addEventListener('submit', function(e){
   e.preventDefault();
 
-  // Получаем данные
+  const requiredFields = [
+    'hospital-name','hospital-city','hospital-district','hospital-address',
+    'hospital-phone','hospital-email','hospital-inn',
+    'admin-name','admin-phone','admin-inn','admin-address','admin-password'
+  ];
+  for(let id of requiredFields){
+    if(!document.getElementById(id).value.trim()){
+      alert("Пожалуйста, заполните все обязательные поля.");
+      return;
+    }
+  }
+
+  const requiredFiles = ['passport-front','passport-back','hospital-seal'];
+  for(let id of requiredFiles){
+    if(!document.getElementById(id).files[0]){
+      alert("Необходимо загрузить все обязательные документы.");
+      return;
+    }
+  }
+
   const hospital = {
     name: document.getElementById('hospital-name').value,
     city: document.getElementById('hospital-city').value,
     district: document.getElementById('hospital-district').value,
     address: document.getElementById('hospital-address').value,
     phone: document.getElementById('hospital-phone').value,
-    email: document.getElementById('hospital-email').value,
+    email: document.getElementById('hospital-email').value.trim().toLowerCase(),
     inn: document.getElementById('hospital-inn').value,
-    logo: document.getElementById('hospital-logo').files[0] ? document.getElementById('hospital-logo').files[0].name : '',
+    logo: document.getElementById('hospital-logo').files[0]?.name || '',
     seal: document.getElementById('hospital-seal').files[0].name
   };
 
@@ -121,10 +119,11 @@ document.getElementById('registerForm').addEventListener('submit', function(e){
     passportFront: document.getElementById('passport-front').files[0].name,
     passportBack: document.getElementById('passport-back').files[0].name,
     password: document.getElementById('admin-password').value,
+    email: document.getElementById('hospital-email').value.trim().toLowerCase(),
     hospital: hospital
   };
 
-  // Сохраняем в localStorage
+  // Сохраняем администратора в общем массиве
   const admins = JSON.parse(localStorage.getItem('analizgo_admins') || '[]');
   admins.push(admin);
   localStorage.setItem('analizgo_admins', JSON.stringify(admins));
@@ -132,7 +131,9 @@ document.getElementById('registerForm').addEventListener('submit', function(e){
   // Сохраняем текущую сессию
   localStorage.setItem('analizgo_current_admin', JSON.stringify(admin));
 
-  // Перенаправляем на панель администратора
+  alert("Вы успешно зарегистрировались! Теперь вы вошли в систему.");
+
+  // Переход на дашборд
   window.location.href = 'admin-dashboard.html';
 });
 </script>

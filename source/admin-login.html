@@ -1,364 +1,62 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Админ / Пациент — Вход и Регистрация</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <title>Вход администратора</title>
+  <link rel="stylesheet" href="css/admin.css">
   <style>
-    :root{--bg:#f6f8fb;--card:#fff;--primary:#0b72d9;--muted:#6b7280}
-    body{font-family:Inter, system-ui, Arial; background:var(--bg); margin:0; padding:0; display:flex; align-items:center; justify-content:center; min-height:100vh;}
-    .wrap{width:100%; max-width:980px; background:linear-gradient(180deg,#fff 0%, #f8fbff 100%); box-shadow:0 8px 30px rgba(18,38,63,0.08); border-radius:10px; overflow:hidden; display:flex; gap:0;}
-    .left{flex:1; padding:36px 40px; background:var(--primary); color:#fff; display:flex; flex-direction:column; justify-content:center; gap:18px}
-    .left h2{margin:0 0 6px 0; font-size:22px}
-    .left p{margin:0; color:rgba(255,255,255,0.9)}
-    .right{flex:1; padding:28px; background:var(--card)}
-    .tabs{display:flex; gap:8px; margin-bottom:18px}
-    .tab-btn{flex:1; padding:10px 12px; border-radius:8px; border:1px solid #e6eefc; background:#f7fbff; cursor:pointer; text-align:center}
-    .tab-btn.active{background:var(--primary); color:#fff; border-color:transparent}
-    form{display:none}
-    form.active{display:block}
-    .field{display:flex; flex-direction:column; gap:6px; margin-bottom:12px}
-    label{font-size:13px; color:var(--muted)}
-    input[type="text"], input[type="email"], input[type="password"], input[type="tel"], input[type="date"], select{padding:10px 12px; border:1px solid #e6eefc; border-radius:8px; font-size:14px}
-    .row{display:flex; gap:12px}
-    .btn{display:inline-block; padding:10px 14px; background:var(--primary); color:#fff; border-radius:8px; border:none; cursor:pointer}
-    .ghost{background:transparent; border:1px solid #e6eefc; color:var(--muted)}
-    .small{font-size:13px; color:var(--muted); margin-top:8px}
-    .divider{height:1px; background:#f1f5f9; margin:14px 0}
-    .note{font-size:13px; color:#9aa6bf}
-    .success{color:green}
-    .error{color:#b00020}
-    @media(max-width:880px){ .wrap{flex-direction:column} .left{padding:18px} }
+    body{font-family:Arial,sans-serif;background:#f4f7fb;margin:0;padding:0;}
+    .admin-container{display:flex;justify-content:center;align-items:center;min-height:100vh;}
+    .form-box{background:#fff;padding:24px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.1);width:400px;}
+    .form-box h2{margin-bottom:12px;}
+    .form-box label{display:block;margin-top:10px;font-weight:500;}
+    .form-box input, .form-box button{width:100%;padding:8px 10px;margin-top:6px;border-radius:6px;border:1px solid #ccc;box-sizing:border-box;}
+    .form-box button{background:#0b72d9;color:#fff;border:none;cursor:pointer;}
+    .form-box button:hover{background:#095bb5;}
+    .form-box .switch{margin-top:12px;text-align:center;}
+    .form-box .switch a{color:#0b72d9;text-decoration:none;}
+    .small{font-size:13px;color:red;margin-top:8px;}
   </style>
 </head>
 <body>
-  <div class="wrap" role="main" aria-label="Админ и пациент — вход и регистрация">
-    <div class="left" aria-hidden="false">
-      <h2>Панель администратора / Кабинет пациента</h2>
-      <p>Войдите в аккаунт администратора или пациента, либо создайте новый. После входа появится панель управления: загрузка результатов, пациенты, врачи, история анализов и т.д.</p>
-      <p class="note">Данные сейчас сохраняются локально (localStorage). Для продакшна — подключаем API.</p>
-    </div>
 
-    <div class="right">
-      <div class="tabs" role="tablist" aria-label="Вход и регистрация">
-        <button id="tab-login" class="tab-btn active" role="tab" aria-selected="true">Войти</button>
-        <button id="tab-register" class="tab-btn" role="tab" aria-selected="false">Регистрация</button>
-      </div>
-
-      <!-- LOGIN FORM -->
-      <form id="form-login" class="active" autocomplete="on">
-        <div class="row">
-          <div class="field" style="flex:1">
-            <label for="login-email">Email</label>
-            <input id="login-email" type="email" required />
-          </div>
-          <div class="field" style="flex:1">
-            <label for="login-role">Я</label>
-            <select id="login-role">
-              <option value="admin">Админ</option>
-              <option value="patient">Пациент</option>
-            </select>
-          </div>
-        </div>
-        <div class="field">
-          <label for="login-pass">Пароль</label>
-          <input id="login-pass" type="password" required />
-        </div>
-        <div style="display:flex; gap:10px; align-items:center; margin-top:6px;">
-          <button type="submit" class="btn">Войти</button>
-          <button type="button" id="toRegister" class="ghost">Нет аккаунта? Зарегистрироваться</button>
-        </div>
-        <p id="login-msg" class="small"></p>
-      </form>
-
-      <!-- REGISTER FORM -->
-      <form id="form-register" class="" autocomplete="on">
-        <h4 style="margin-top:0">Регистрация</h4>
-
-        <div class="row">
-          <div class="field" style="flex:1">
-            <label for="reg-role-select">Я регистрируюсь как</label>
-            <select id="reg-role-select">
-              <option value="admin">Админ</option>
-              <option value="patient">Пациент</option>
-            </select>
-          </div>
-        </div>
-
-        <div id="admin-fields">
-          <h4 style="margin-top:8px">Данные администратора</h4>
-          <div class="field">
-            <label for="reg-name">ФИО администратора</label>
-            <input id="reg-name" type="text" required />
-          </div>
-          <div class="field">
-            <label for="reg-email">Email администратора</label>
-            <input id="reg-email" type="email" required />
-          </div>
-          <div class="row">
-            <div class="field" style="flex:1">
-              <label for="reg-pass">Пароль</label>
-              <input id="reg-pass" type="password" required />
-            </div>
-            <div class="field" style="flex:1">
-              <label for="reg-pass2">Повторите пароль</label>
-              <input id="reg-pass2" type="password" required />
-            </div>
-          </div>
-          <div class="field">
-            <label for="reg-birth">Дата рождения</label>
-            <input id="reg-birth" type="date" />
-          </div>
-          <div class="row">
-            <div class="field" style="flex:1">
-              <label for="reg-gender">Пол</label>
-              <select id="reg-gender">
-                <option value="male">Мужской</option>
-                <option value="female">Женский</option>
-                <option value="other">Другое</option>
-              </select>
-            </div>
-            <div class="field" style="flex:1">
-              <label for="reg-nationality">Национальность</label>
-              <input id="reg-nationality" type="text" />
-            </div>
-          </div>
-
-          <div class="divider"></div>
-
-          <h4>Данные больницы</h4>
-          <div class="field">
-            <label for="h-name">Название больницы</label>
-            <input id="h-name" type="text" required />
-          </div>
-          <div class="row">
-            <div class="field" style="flex:1">
-              <label for="h-address">Адрес</label>
-              <input id="h-address" type="text" />
-            </div>
-            <div class="field" style="flex:1">
-              <label for="h-phone">Телефон</label>
-              <input id="h-phone" type="tel" />
-            </div>
-          </div>
-          <div class="field">
-            <label for="h-email">Email больницы</label>
-            <input id="h-email" type="email" />
-          </div>
-          <div class="field">
-            <label for="h-id">ID больницы</label>
-            <input id="h-id" type="text" placeholder="например: HOSP1234" />
-          </div>
-          <div class="row">
-            <div class="field" style="flex:1">
-              <label>Логотип больницы</label>
-              <input type="file" accept="image/*" />
-            </div>
-            <div class="field" style="flex:1">
-              <label>Официальная печать</label>
-              <input type="file" accept="image/*" />
-            </div>
-          </div>
-          <div class="row">
-            <div class="field" style="flex:1">
-              <label>Фото паспорта (передняя)</label>
-              <input type="file" accept="image/*" />
-            </div>
-            <div class="field" style="flex:1">
-              <label>Фото паспорта (задняя)</label>
-              <input type="file" accept="image/*" />
-            </div>
-          </div>
-        </div>
-
-        <div id="patient-fields" style="display:none">
-          <h4 style="margin-top:8px">Данные пациента</h4>
-          <div class="field">
-            <label for="p-name">ФИО</label>
-            <input id="p-name" type="text" required />
-          </div>
-          <div class="row">
-            <div class="field" style="flex:1">
-              <label for="p-gender">Пол</label>
-              <select id="p-gender">
-                <option value="male">Мужской</option>
-                <option value="female">Женский</option>
-                <option value="other">Другое</option>
-              </select>
-            </div>
-            <div class="field" style="flex:1">
-              <label for="p-nationality">Национальность</label>
-              <input id="p-nationality" type="text" />
-            </div>
-          </div>
-          <div class="field">
-            <label for="p-birth">Дата рождения</label>
-            <input id="p-birth" type="date" />
-          </div>
-          <div class="row">
-            <div class="field" style="flex:1">
-              <label for="p-city">Город</label>
-              <input id="p-city" type="text" />
-            </div>
-            <div class="field" style="flex:1">
-              <label for="p-district">Район</label>
-              <input id="p-district" type="text" />
-            </div>
-          </div>
-          <div class="field">
-            <label for="p-address">Адрес</label>
-            <input id="p-address" type="text" />
-          </div>
-          <div class="field">
-            <label for="p-phone">Номер телефона (SMS)</label>
-            <input id="p-phone" type="tel" />
-          </div>
-          <div class="field">
-            <label for="p-email">Email (по желанию)</label>
-            <input id="p-email" type="email" />
-          </div>
-          <div class="field">
-            <label for="p-inn">ИНН</label>
-            <input id="p-inn" type="text" />
-          </div>
-          <div class="row">
-            <div class="field" style="flex:1">
-              <label>Фото паспорта (передняя)</label>
-              <input type="file" accept="image/*" />
-            </div>
-            <div class="field" style="flex:1">
-              <label>Фото паспорта (задняя)</label>
-              <input type="file" accept="image/*" />
-            </div>
-          </div>
-        </div>
-
-        <div style="display:flex; gap:10px; margin-top:8px;">
-          <button type="submit" class="btn">Создать аккаунт</button>
-          <button type="button" id="toLogin" class="ghost">Уже есть аккаунт? Войти</button>
-        </div>
-        <p id="reg-msg" class="small"></p>
-      </form>
-
-    </div>
+<div class="admin-container">
+  <div class="form-box">
+    <h2>Вход администратора</h2>
+    <form id="loginForm">
+      <label>Email</label>
+      <input type="email" id="login-email" required placeholder="Введите email">
+      <label>Пароль</label>
+      <input type="password" id="login-password" required placeholder="Введите пароль">
+      <button type="submit">Войти</button>
+      <p class="small" id="login-msg"></p>
+      <p class="switch">Нет аккаунта? <a href="admin-registr.html">Зарегистрироваться</a></p>
+    </form>
   </div>
+</div>
 
-  <script>
-    const tabLogin = document.getElementById('tab-login');
-    const tabRegister = document.getElementById('tab-register');
-    const formLogin = document.getElementById('form-login');
-    const formRegister = document.getElementById('form-register');
-    const toRegister = document.getElementById('toRegister');
-    const toLogin = document.getElementById('toLogin');
-    const loginMsg = document.getElementById('login-msg');
-    const regMsg = document.getElementById('reg-msg');
-    const roleSelect = document.getElementById('reg-role-select');
-    const adminFields = document.getElementById('admin-fields');
-    const patientFields = document.getElementById('patient-fields');
+<script>
+document.getElementById('loginForm').addEventListener('submit', function(e){
+  e.preventDefault();
 
-    function showLogin(){ tabLogin.classList.add('active'); tabRegister.classList.remove('active'); formLogin.classList.add('active'); formRegister.classList.remove('active'); }
-    function showRegister(){ tabRegister.classList.add('active'); tabLogin.classList.remove('active'); formRegister.classList.add('active'); formLogin.classList.remove('active'); }
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const password = document.getElementById('login-password').value;
 
-    tabLogin.addEventListener('click', showLogin);
-    tabRegister.addEventListener('click', showRegister);
-    toRegister.addEventListener('click', showRegister);
-    toLogin.addEventListener('click', showLogin);
+  const admins = JSON.parse(localStorage.getItem('analizgo_admins') || '[]');
+  const admin = admins.find(a => a.email === email && a.password === password);
 
-    // Переключение полей по типу регистрации
-    roleSelect.addEventListener('change', ()=>{
-      if(roleSelect.value==='admin'){ adminFields.style.display='block'; patientFields.style.display='none'; }
-      else{ adminFields.style.display='none'; patientFields.style.display='block'; }
-    });
+  const msg = document.getElementById('login-msg');
+  if(admin){
+    localStorage.setItem('analizgo_current_admin', JSON.stringify(admin));
+    msg.style.color = 'green';
+    msg.textContent = "Вход успешен. Перенаправление...";
+    window.location.href='admin-dashboard.html';
+  } else {
+    msg.style.color = 'red';
+    msg.textContent = "Неправильный email или пароль";
+  }
+});
+</script>
 
-    function getAdmins(){ try{return JSON.parse(localStorage.getItem('analizgo_admins')||'[]')}catch(e){return[]} }
-    function saveAdmins(list){ localStorage.setItem('analizgo_admins', JSON.stringify(list)) }
-
-    function getPatients(){ try{return JSON.parse(localStorage.getItem('analizgo_patients')||'[]')}catch(e){return[]} }
-    function savePatients(list){ localStorage.setItem('analizgo_patients', JSON.stringify(list)) }
-
-    // Регистрация
-    formRegister.addEventListener('submit', e=>{
-      e.preventDefault(); regMsg.textContent=''; 
-      const role = roleSelect.value;
-
-      if(role==='admin'){
-        const name=document.getElementById('reg-name').value.trim();
-        const email=document.getElementById('reg-email').value.trim().toLowerCase();
-        const pass=document.getElementById('reg-pass').value;
-        const pass2=document.getElementById('reg-pass2').value;
-
-        if(!name||!email||!pass){ regMsg.textContent='Заполните все обязательные поля'; regMsg.className='error'; return; }
-        if(pass!==pass2){ regMsg.textContent='Пароли не совпадают'; regMsg.className='error'; return; }
-
-        const admins = getAdmins();
-        if(admins.some(a=>a.email===email)){ regMsg.textContent='Аккаунт с таким email уже существует'; regMsg.className='error'; return; }
-
-        const newAdmin={ id:'admin_'+Date.now(), name,email,password:pass,
-          hospital:{
-            id:document.getElementById('h-id').value||('HOSP'+Date.now().toString().slice(-5)),
-            name:document.getElementById('h-name').value,
-            address:document.getElementById('h-address').value,
-            phone:document.getElementById('h-phone').value,
-            email:document.getElementById('h-email').value
-          },
-          birth:document.getElementById('reg-birth').value,
-          gender:document.getElementById('reg-gender').value,
-          nationality:document.getElementById('reg-nationality').value,
-          createdAt:new Date().toISOString()
-        };
-        admins.push(newAdmin); saveAdmins(admins);
-        localStorage.setItem('analizgo_current_admin',JSON.stringify({id:newAdmin.id,email:newAdmin.email}));
-        regMsg.textContent='Аккаунт создан. Перенаправление...'; regMsg.className='success';
-        setTimeout(()=>window.location.href='admin-dashboard.html',700);
-      } else {
-        // Регистрация пациента
-        const name=document.getElementById('p-name').value.trim();
-        const gender=document.getElementById('p-gender').value;
-        const nationality=document.getElementById('p-nationality').value.trim();
-        const birth=document.getElementById('p-birth').value;
-        const city=document.getElementById('p-city').value.trim();
-        const district=document.getElementById('p-district').value.trim();
-        const address=document.getElementById('p-address').value.trim();
-        const phone=document.getElementById('p-phone').value.trim();
-        const email=document.getElementById('p-email').value.trim().toLowerCase();
-        const inn=document.getElementById('p-inn').value.trim();
-
-        if(!name||!phone){ regMsg.textContent='Заполните обязательные поля: ФИО и телефон'; regMsg.className='error'; return; }
-
-        const patients = getPatients();
-        const newPatient={ id:'patient_'+Date.now(), name,gender,nationality,birth,city,district,address,phone,email,inn,createdAt:new Date().toISOString() };
-        patients.push(newPatient); savePatients(patients);
-
-        localStorage.setItem('analizgo_current_patient',JSON.stringify({id:newPatient.id,phone:newPatient.phone}));
-        regMsg.textContent='Пациент зарегистрирован. ID отправлен на номер. Перенаправление...'; regMsg.className='success';
-        setTimeout(()=>window.location.href='patient-dashboard.html',700);
-      }
-    });
-
-    // Вход
-    formLogin.addEventListener('submit', e=>{
-      e.preventDefault(); loginMsg.textContent='';
-      const email=document.getElementById('login-email').value.trim().toLowerCase();
-      const role=document.getElementById('login-role').value;
-      const pass=document.getElementById('login-pass').value;
-
-      if(role==='admin'){
-        const admins=getAdmins();
-        const admin=admins.find(a=>a.email===email && a.password===pass);
-        if(!admin){ loginMsg.textContent='Неправильный email или пароль'; loginMsg.className='error'; return; }
-        localStorage.setItem('analizgo_current_admin',JSON.stringify({id:admin.id,email:admin.email}));
-        loginMsg.textContent='Вход успешен. Перенаправление...'; loginMsg.className='success';
-        setTimeout(()=>window.location.href='admin-dashboard.html',500);
-      } else {
-        const patients=getPatients();
-        const patient=patients.find(p=>p.email===email || p.phone===email);
-        if(!patient){ loginMsg.textContent='Пациент не найден'; loginMsg.className='error'; return; }
-        localStorage.setItem('analizgo_current_patient',JSON.stringify({id:patient.id,phone:patient.phone}));
-        loginMsg.textContent='Вход успешен. Перенаправление...'; loginMsg.className='success';
-        setTimeout(()=>window.location.href='patient-dashboard.html',500);
-      }
-    });
-  </script>
 </body>
 </html>
