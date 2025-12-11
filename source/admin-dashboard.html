@@ -32,8 +32,6 @@
   @media(max-width:880px){ .grid{flex-direction:column} .sidebar{width:100%} }
   .small-btn{padding:4px 6px; font-size:12px; margin-right:4px;}
   .action-buttons button { margin-right:6px; }
-
-  /* Модальное окно редактирования */
   .edit-modal {
     display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%);
     background:#fff; border-radius:12px; box-shadow:0 8px 30px rgba(16,32,58,0.2);
@@ -114,8 +112,7 @@
         <div style="margin-top:18px">
           <h4>Список загруженных результатов</h4>
           <table id="upload-table">
-            <thead><tr><th>Пациент</th><th>Файл</th><th>Статус</th><th>Дата</th><th>Действия</th></tr></thead>
-            <tbody></tbody>
+            <thead><tr><th>Пациент</th><th>Файл</th><th>Статус</th><th>Дата</th><th>Действия</th></tr></thead><tbody></tbody>
           </table>
         </div>
       </div>
@@ -172,7 +169,7 @@
             <div id="sub-pending" class="subtab">В процессе</div>
           </div>
         </div>
-        <table id="results-table"><thead><tr><th>Пациент</th><th>Файл</th><th>Врач</th><th>Статус</th><th>Дата</th><th>Действия</th></tr></thead><tbody></tbody></table>
+        <table id="results-table"><thead><tr><th>Пациент</th><th>Файл</th><th>Врач</th><th>Статус</th><th>Дата</th><th>Действия</th></tr></thead><tbody></tbody>
       </div>
     </main>
   </div>
@@ -190,12 +187,7 @@
 
 <script>
 (function(){
-  const current = JSON.parse(localStorage.getItem('analizgo_current_admin') || 'null');
-  if(!current){ alert('Сначала войдите как администратор.'); window.location.href='admin-login.html'; return; }
-  const admins = JSON.parse(localStorage.getItem('analizgo_admins') || '[]');
-  const admin = admins.find(a=>a.id===current.id || a.email===current.email) || admins[0];
-  if(!admin){ alert('Админ не найден.'); localStorage.removeItem('analizgo_current_admin'); window.location.href='admin-login.html'; return; }
-  document.getElementById('hospital-info').textContent = admin.hospital? ' — '+admin.hospital.name : '';
+  // --- Настройка LocalStorage ---
   function get(key){ return JSON.parse(localStorage.getItem(key)||'[]'); }
   function set(key,val){ localStorage.setItem(key,JSON.stringify(val)); }
   if(!localStorage.getItem('analizgo_patients')) set('analizgo_patients',[]);
@@ -203,6 +195,7 @@
   if(!localStorage.getItem('analizgo_results')) set('analizgo_results',[]);
   if(!localStorage.getItem('analizgo_analysis_accept')) set('analizgo_analysis_accept',[]);
 
+  // --- Навигация ---
   const views = {
     accept: document.getElementById('view-accept'),
     upload: document.getElementById('view-upload'),
@@ -229,216 +222,153 @@
     window.location.href='admin-login.html';
   });
 
-  const editModal = document.getElementById('edit-modal');
-  const editFieldsDiv = document.getElementById('edit-fields');
-  let currentEdit = null;
-
-  function openEditModal(type, item){
-    currentEdit = {type, item, original: {...item}};
-    editFieldsDiv.innerHTML='';
-    const fields=[];
-    if(type==='patients'){
-      fields.push({label:'ФИО', key:'name', type:'text'});
-      fields.push({label:'Национальность', key:'nationality', type:'text'});
-      fields.push({label:'Пол', key:'sex', type:'select', options:['М','Ж']});
-      fields.push({label:'Дата рождения', key:'dob', type:'date'});
-    } else if(type==='doctors'){
-      fields.push({label:'ФИО', key:'name', type:'text'});
-      fields.push({label:'Специальность', key:'specialty', type:'text'});
-      fields.push({label:'Пол', key:'sex', type:'select', options:['М','Ж']});
-    } else if(type==='accept'){
-      fields.push({label:'Пациент', key:'patientId', type:'select', options:get('analizgo_patients').map(p=>({value:p.id, text:p.name}))});
-      fields.push({label:'Тип анализа', key:'type', type:'text'});
-      fields.push({label:'Дата', key:'date', type:'date'});
-    } else if(type==='results'){
-      fields.push({label:'Файл', key:'fileName', type:'text'});
-      fields.push({label:'Статус', key:'status', type:'select', options:['ready','pending']});
-    }
-    fields.forEach(f=>{
-      const div=document.createElement('div'); div.className='form-row';
-      const label=document.createElement('label'); label.textContent=f.label; label.style.width='100px';
-      let input;
-      if(f.type==='select'){
-        input=document.createElement('select');
-        f.options.forEach(o=>{
-          if(typeof o==='string'){ const opt=document.createElement('option'); opt.value=o; opt.textContent=o; input.appendChild(opt); }
-          else{ const opt=document.createElement('option'); opt.value=o.value; opt.textContent=o.text; input.appendChild(opt); }
-        });
-      } else{ input=document.createElement('input'); input.type=f.type; }
-      input.value=item[f.key]||'';
-      input.dataset.key=f.key;
-      div.appendChild(label); div.appendChild(input); editFieldsDiv.appendChild(div);
-    });
-    editModal.classList.add('active');
-  }
-
-  document.getElementById('cancel-edit').onclick = ()=>{ editModal.classList.remove('active'); currentEdit=null; };
-  document.getElementById('save-edit').onclick = ()=>{
-    if(!currentEdit) return;
-    const inputs = editFieldsDiv.querySelectorAll('input, select');
-    let changed = false;
-    inputs.forEach(i=>{
-      if(currentEdit.item[i.dataset.key]!==i.value){ changed=true; }
-    });
-    if(!changed){ alert('Нет изменений. Внесите правки или нажмите Отмена.'); return; }
-    const dataKey = currentEdit.type==='patients'? 'analizgo_patients' :
-                    currentEdit.type==='doctors'? 'analizgo_doctors' :
-                    currentEdit.type==='accept'? 'analizgo_analysis_accept' :
-                    'analizgo_results';
-    const data = get(dataKey);
-    const idx = data.findIndex(d=>d.id===currentEdit.item.id);
-    if(idx!==-1){
-      inputs.forEach(i=>{ data[idx][i.dataset.key]=i.value; });
-      set(dataKey, data);
-      if(currentEdit.type==='patients') renderPatients();
-      if(currentEdit.type==='doctors') renderDoctors();
-      if(currentEdit.type==='accept') renderAnalysisAccept();
-      if(currentEdit.type==='results') renderAnalysisUpload();
-    }
-    editModal.classList.remove('active'); currentEdit=null;
-  }
-
+  // --- Общие кнопки ---
   function createActionButtons(item, type){
     const wrapper = document.createElement('div');
     wrapper.className = 'action-buttons';
-    const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'btn small-btn';
-    deleteBtn.textContent = 'Удалить';
-    deleteBtn.addEventListener('click', ()=>{
+    const deleteBtn = document.createElement('button'); deleteBtn.className='btn small-btn'; deleteBtn.textContent='Удалить';
+    deleteBtn.addEventListener('click',()=>{
       if(!confirm('Удалить этот элемент?')) return;
-      if(type==='patients'){ let data=get('analizgo_patients'); data=data.filter(p=>p.id!==item.id); set('analizgo_patients',data); renderPatients(); renderAnalysisAccept(); renderAnalysisUpload(); renderResults();}
-      else if(type==='doctors'){ let data=get('analizgo_doctors'); data=data.filter(d=>d.id!==item.id); set('analizgo_doctors',data); renderDoctors(); renderResults();}
-      else if(type==='accept'){ let data=get('analizgo_analysis_accept'); data=data.filter(a=>a.id!==item.id); set('analizgo_analysis_accept',data); renderAnalysisAccept(); renderAnalysisUpload();}
-      else if(type==='results'){ let data=get('analizgo_results'); data=data.filter(r=>r.id!==item.id); set('analizgo_results',data); renderAnalysisUpload(); renderResults();}
+      const keys={patients:'analizgo_patients', doctors:'analizgo_doctors', accept:'analizgo_analysis_accept', results:'analizgo_results'};
+      const data=get(keys[type]); set(keys[type], data.filter(d=>d.id!==item.id));
+      if(type==='patients'){ renderPatients(); renderAnalysisAccept(); renderAnalysisUpload(); renderResults(); }
+      if(type==='doctors'){ renderDoctors(); renderResults(); }
+      if(type==='accept'){ renderAnalysisAccept(); renderAnalysisUpload(); }
+      if(type==='results'){ renderAnalysisUpload(); renderResults(); }
     });
-    const editBtn = document.createElement('button');
-    editBtn.className = 'btn small-btn';
-    editBtn.textContent = 'Редактировать';
-    editBtn.addEventListener('click', ()=>openEditModal(type, item));
+    const editBtn=document.createElement('button'); editBtn.className='btn small-btn'; editBtn.textContent='Редактировать';
+    editBtn.addEventListener('click',()=>openEditModal(type,item));
     wrapper.appendChild(deleteBtn); wrapper.appendChild(editBtn);
     return wrapper;
   }
 
-  // --- Пациенты ---
-  const addPatientBtn=document.getElementById('add-patient-btn'); const patientForm=document.getElementById('patient-form');
-  const savePatient=document.getElementById('save-patient'); const cancelPatient=document.getElementById('cancel-patient'); const patientsTableBody=document.querySelector('#patients-table tbody');
-  addPatientBtn.onclick=()=>patientForm.style.display='block';
-  cancelPatient.onclick=()=>{patientForm.style.display='none'; clearPatientForm();}
-  function clearPatientForm(){ document.getElementById('p-name').value=''; document.getElementById('p-nationality').value=''; document.getElementById('p-sex').value=''; document.getElementById('p-dob').value=''; }
-  savePatient.onclick=()=>{
-    const name=document.getElementById('p-name').value.trim();
-    const nat=document.getElementById('p-nationality').value.trim();
-    const sex=document.getElementById('p-sex').value;
-    const dob=document.getElementById('p-dob').value.trim();
-    if(!name){ alert('Введите имя пациента'); return; }
-    const patients=get('analizgo_patients');
-    patients.push({id:'p'+Date.now(), name, nationality:nat, sex, dob});
-    set('analizgo_patients',patients);
-    patientForm.style.display='none'; clearPatientForm(); renderPatients();
-  };
-  function renderPatients(){ const patients=get('analizgo_patients'); patientsTableBody.innerHTML=''; patients.forEach(p=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${p.name}</td><td>${p.nationality||''}</td><td>${p.sex||''}</td><td>${p.dob||''}</td>`; tr.appendChild(createActionButtons(p,'patients')); patientsTableBody.appendChild(tr); }); }
+  // --- Модальное редактирование ---
+  const editModal = document.getElementById('edit-modal'); const editFieldsDiv = document.getElementById('edit-fields'); let currentEdit=null;
+  function openEditModal(type,item){
+    currentEdit={type,item,original:{...item}}; editFieldsDiv.innerHTML='';
+    const fields=[];
+    if(type==='patients'){ fields.push({label:'ФИО',key:'name',type:'text'}); fields.push({label:'Национальность',key:'nationality',type:'text'}); fields.push({label:'Пол',key:'sex',type:'select',options:['М','Ж']}); fields.push({label:'Дата рождения',key:'dob',type:'date'});}
+    if(type==='doctors'){ fields.push({label:'ФИО',key:'name',type:'text'}); fields.push({label:'Спец.',key:'specialty',type:'text'}); fields.push({label:'Пол',key:'sex',type:'select',options:['М','Ж']}); }
+    if(type==='accept'){ fields.push({label:'Пациент',key:'patientId',type:'select',options:get('analizgo_patients').map(p=>({value:p.id,text:p.name}))}); fields.push({label:'Тип анализа',key:'type',type:'text'}); fields.push({label:'Дата',key:'date',type:'date'});}
+    if(type==='results'){ fields.push({label:'Файл',key:'fileName',type:'text'}); fields.push({label:'Статус',key:'status',type:'select',options:['ready','pending']});}
+    fields.forEach(f=>{
+      const div=document.createElement('div'); div.className='form-row';
+      const label=document.createElement('label'); label.textContent=f.label; label.style.width='100px';
+      let input;
+      if(f.type==='select'){ input=document.createElement('select'); f.options.forEach(o=>{ const opt=document.createElement('option'); opt.value=typeof o==='string'?o:o.value; opt.textContent=typeof o==='string'?o:o.text; input.appendChild(opt); }); }
+      else{ input=document.createElement('input'); input.type=f.type; }
+      input.value=item[f.key]||''; input.dataset.key=f.key; div.appendChild(label); div.appendChild(input); editFieldsDiv.appendChild(div);
+    });
+    editModal.classList.add('active');
+  }
+  document.getElementById('cancel-edit').addEventListener('click',()=>{ editModal.classList.remove('active'); });
+  document.getElementById('save-edit').addEventListener('click',()=>{
+    const inputs=editFieldsDiv.querySelectorAll('input,select'); inputs.forEach(i=>currentEdit.item[i.dataset.key]=i.value);
+    const keys={patients:'analizgo_patients', doctors:'analizgo_doctors', accept:'analizgo_analysis_accept', results:'analizgo_results'};
+    const data=get(keys[currentEdit.type]); set(keys[currentEdit.type], data.map(d=>d.id===currentEdit.item.id?currentEdit.item:d));
+    editModal.classList.remove('active');
+    if(currentEdit.type==='patients'){ renderPatients(); renderAnalysisAccept(); renderAnalysisUpload(); renderResults(); }
+    if(currentEdit.type==='doctors'){ renderDoctors(); renderResults(); }
+    if(currentEdit.type==='accept'){ renderAnalysisAccept(); renderAnalysisUpload(); }
+    if(currentEdit.type==='results'){ renderAnalysisUpload(); renderResults(); }
+  });
 
-  // --- Врачи ---
-  const addDoctorBtn=document.getElementById('add-doctor-btn'); const doctorForm=document.getElementById('doctor-form');
-  const saveDoctor=document.getElementById('save-doctor'); const cancelDoctor=document.getElementById('cancel-doctor'); const doctorsTableBody=document.querySelector('#doctors-table tbody');
-  addDoctorBtn.onclick=()=>doctorForm.style.display='block';
-  cancelDoctor.onclick=()=>{doctorForm.style.display='none'; clearDoctorForm();}
-  function clearDoctorForm(){ document.getElementById('d-name').value=''; document.getElementById('d-specialty').value=''; document.getElementById('d-sex').value=''; }
-  saveDoctor.onclick=()=>{ const name=document.getElementById('d-name').value.trim(); const specialty=document.getElementById('d-specialty').value.trim(); const sex=document.getElementById('d-sex').value; if(!name){ alert('Введите имя врача'); return; } const doctors=get('analizgo_doctors'); doctors.push({id:'d'+Date.now(), name, specialty, sex}); set('analizgo_doctors',doctors); doctorForm.style.display='none'; clearDoctorForm(); renderDoctors(); }
-  function renderDoctors(){ const doctors=get('analizgo_doctors'); doctorsTableBody.innerHTML=''; doctors.forEach(d=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${d.name}</td><td>${d.specialty||''}</td><td>${d.sex||''}</td>`; tr.appendChild(createActionButtons(d,'doctors')); doctorsTableBody.appendChild(tr); }); }
+  // --- Рендер таблиц ---
+  const patientsTable = document.querySelector('#patients-table tbody');
+  function renderPatients(){
+    const patients=get('analizgo_patients'); patientsTable.innerHTML='';
+    patients.forEach(p=>{
+      const tr=document.createElement('tr'); tr.innerHTML=`<td>${p.name}</td><td>${p.nationality}</td><td>${p.sex}</td><td>${p.dob}</td>`; tr.appendChild(createActionButtons(p,'patients')); patientsTable.appendChild(tr);
+    });
+    const select = document.getElementById('analysis-patient'); select.innerHTML='<option value="">Выберите пациента</option>';
+    patients.forEach(p=>{ const opt=document.createElement('option'); opt.value=p.id; opt.textContent=p.name; select.appendChild(opt); });
+  }
 
-  // --- Прием анализа ---
-  const analysisPatientSelect=document.getElementById('analysis-patient');
-  const analysisTypeInput=document.getElementById('analysis-type');
-  const analysisDateInput=document.getElementById('analysis-date');
-  const analysisFileInput=document.getElementById('analysis-file');
-  const saveAnalysisBtn=document.getElementById('save-analysis');
-  const cancelAnalysisBtn=document.getElementById('cancel-analysis');
-  const acceptTableBody=document.querySelector('#accept-table tbody');
-  function renderAnalysisAccept(){
-    const patients=get('analizgo_patients');
-    analysisPatientSelect.innerHTML='<option value="">Выберите пациента</option>';
-    patients.forEach(p=>{ const opt=document.createElement('option'); opt.value=p.id; opt.textContent=p.name; analysisPatientSelect.appendChild(opt); });
-    const accept=get('analizgo_analysis_accept');
-    acceptTableBody.innerHTML='';
-    accept.forEach(a=>{
-      const patient=(get('analizgo_patients')||[]).find(p=>p.id===a.patientId);
-      const tr=document.createElement('tr');
-      tr.innerHTML=`<td>${patient?patient.name:'—'}</td><td>${a.type}</td><td>${a.date}</td><td>${a.fileName||''}</td>`;
-      tr.appendChild(createActionButtons(a,'accept'));
-      acceptTableBody.appendChild(tr);
+  const doctorsTable=document.querySelector('#doctors-table tbody');
+  function renderDoctors(){
+    const doctors=get('analizgo_doctors'); doctorsTable.innerHTML='';
+    doctors.forEach(d=>{
+      const tr=document.createElement('tr'); tr.innerHTML=`<td>${d.name}</td><td>${d.specialty}</td><td>${d.sex}</td>`; tr.appendChild(createActionButtons(d,'doctors')); doctorsTable.appendChild(tr);
     });
   }
-  cancelAnalysisBtn.onclick=()=>{ analysisPatientSelect.value=''; analysisTypeInput.value=''; analysisDateInput.value=''; analysisFileInput.value=''; }
-  saveAnalysisBtn.onclick=()=>{
-    const patientId=analysisPatientSelect.value; const type=analysisTypeInput.value.trim(); const date=analysisDateInput.value; const file=analysisFileInput.files[0];
-    if(!patientId || !type || !date){ alert('Заполните все поля'); return; }
-    const accept=get('analizgo_analysis_accept'); accept.push({id:'a'+Date.now(), patientId, type, date, fileName:file?file.name:''}); set('analizgo_analysis_accept',accept);
-    renderAnalysisAccept();
-    analysisPatientSelect.value=''; analysisTypeInput.value=''; analysisDateInput.value=''; analysisFileInput.value='';
+
+  const acceptTable=document.querySelector('#accept-table tbody');
+  function renderAnalysisAccept(){
+    const accepts=get('analizgo_analysis_accept'); acceptTable.innerHTML='';
+    accepts.slice().reverse().forEach(a=>{
+      const patient=get('analizgo_patients').find(p=>p.id===a.patientId); const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${patient?patient.name:'—'}</td><td>${a.type}</td><td>${a.date}</td><td>${a.fileName||''}</td>`; tr.appendChild(createActionButtons(a,'accept')); acceptTable.appendChild(tr);
+    });
+    const select=document.getElementById('upload-analysis-select'); select.innerHTML='<option value="">Выберите прием</option>';
+    accepts.forEach(a=>{ const p=get('analizgo_patients').find(p=>p.id===a.patientId); if(p){ const opt=document.createElement('option'); opt.value=a.id; opt.textContent=p.name+' — '+a.type; select.appendChild(opt); } });
   }
+
+  const uploadTable=document.querySelector('#upload-table tbody');
+  function renderAnalysisUpload(){
+    const results=get('analizgo_results'); uploadTable.innerHTML='';
+    results.slice().reverse().forEach(r=>{
+      const patient=get('analizgo_patients').find(p=>p.id===r.patientId); const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${patient?patient.name:'—'}</td><td>${r.fileName}</td><td>${r.status}</td><td>${r.date}</td>`; tr.appendChild(createActionButtons(r,'results')); uploadTable.appendChild(tr);
+    });
+  }
+
+  const resultsTableBody=document.querySelector('#results-table tbody');
+  let resultsFilter='ready';
+  function renderResults(){
+    const results=get('analizgo_results'); resultsTableBody.innerHTML='';
+    const filtered=results.filter(r=>(resultsFilter==='ready'? r.status==='ready' : r.status!=='ready'));
+    filtered.slice().reverse().forEach(r=>{
+      const patient=get('analizgo_patients').find(p=>p.id===r.patientId); const doctor=get('analizgo_doctors').find(d=>d.id===r.doctorId);
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${patient?patient.name:'—'}</td><td>${r.fileName}</td><td>${doctor?doctor.name:''}</td><td>${r.status}</td><td>${r.date}</td>`; tr.appendChild(createActionButtons(r,'results')); resultsTableBody.appendChild(tr);
+    });
+  }
+  document.getElementById('sub-ready').addEventListener('click',()=>{ resultsFilter='ready'; document.querySelectorAll('.subtab').forEach(s=>s.classList.remove('active')); document.getElementById('sub-ready').classList.add('active'); renderResults(); });
+  document.getElementById('sub-pending').addEventListener('click',()=>{ resultsFilter='pending'; document.querySelectorAll('.subtab').forEach(s=>s.classList.remove('active')); document.getElementById('sub-pending').classList.add('active'); renderResults(); });
+
+  // --- Добавление пациентов ---
+  document.getElementById('add-patient-btn').addEventListener('click',()=>document.getElementById('patient-form').style.display='block');
+  document.getElementById('cancel-patient').addEventListener('click',()=>document.getElementById('patient-form').style.display='none');
+  document.getElementById('save-patient').addEventListener('click',()=>{
+    const name=document.getElementById('p-name').value, sex=document.getElementById('p-sex').value, nationality=document.getElementById('p-nationality').value, dob=document.getElementById('p-dob').value;
+    if(!name){ alert('Введите имя'); return; }
+    const patients=get('analizgo_patients'); patients.push({id:Date.now(),name,sex,nationality,dob}); set('analizgo_patients',patients); renderPatients(); document.getElementById('patient-form').style.display='none';
+  });
+
+  // --- Добавление врачей ---
+  document.getElementById('add-doctor-btn').addEventListener('click',()=>document.getElementById('doctor-form').style.display='block');
+  document.getElementById('cancel-doctor').addEventListener('click',()=>document.getElementById('doctor-form').style.display='none');
+  document.getElementById('save-doctor').addEventListener('click',()=>{
+    const name=document.getElementById('d-name').value, sex=document.getElementById('d-sex').value, specialty=document.getElementById('d-specialty').value;
+    if(!name){ alert('Введите имя'); return; }
+    const doctors=get('analizgo_doctors'); doctors.push({id:Date.now(),name,sex,specialty}); set('analizgo_doctors',doctors); renderDoctors(); document.getElementById('doctor-form').style.display='none';
+  });
+
+  // --- Прием анализов ---
+  document.getElementById('save-analysis').addEventListener('click',()=>{
+    const patientId=document.getElementById('analysis-patient').value,type=document.getElementById('analysis-type').value,date=document.getElementById('analysis-date').value,fileInput=document.getElementById('analysis-file'); 
+    if(!patientId||!type||!date){ alert('Заполните все поля'); return; }
+    const fileName=fileInput.files[0]?fileInput.files[0].name:''; const arr=get('analizgo_analysis_accept'); arr.push({id:Date.now(),patientId,type,date,fileName}); set('analizgo_analysis_accept',arr); renderAnalysisAccept();
+  });
 
   // --- Загрузка результатов ---
-  const searchPatientInput=document.getElementById('search-patient-upload');
-  const searchDateInput=document.getElementById('search-date-upload');
-  const searchUploadBtn=document.getElementById('search-upload-btn');
-  const uploadAnalysisSelect=document.getElementById('upload-analysis-select');
-  const uploadFileInput=document.getElementById('upload-file');
-  const uploadBtnUpload=document.getElementById('upload-btn');
-  const uploadMsg=document.getElementById('upload-msg');
-  const uploadTableBody=document.querySelector('#upload-table tbody');
-  function renderAnalysisUpload(){
-    const accept=get('analizgo_analysis_accept');
-    uploadAnalysisSelect.innerHTML='<option value="">Выберите прием</option>';
-    accept.forEach(a=>{
-      const patient=(get('analizgo_patients')||[]).find(p=>p.id===a.patientId);
-      const opt=document.createElement('option'); opt.value=a.id; opt.textContent=patient?patient.name+' | '+a.date+' | '+a.type : '';
-      uploadAnalysisSelect.appendChild(opt);
-    });
-    const results=get('analizgo_results');
-    uploadTableBody.innerHTML='';
-    results.slice().reverse().forEach(r=>{
-      const patient=(get('analizgo_patients')||[]).find(p=>p.id===r.patientId);
-      const tr=document.createElement('tr');
-      tr.innerHTML=`<td>${patient?patient.name:'—'}</td><td>${r.fileName}</td><td>${r.status}</td><td>${r.date}</td>`;
-      tr.appendChild(createActionButtons(r,'results'));
-      uploadTableBody.appendChild(tr);
-    });
-  }
-  searchUploadBtn.onclick=()=>{
-    const name=searchPatientInput.value.toLowerCase(); const date=searchDateInput.value;
-    const accept=get('analizgo_analysis_accept');
-    let filtered=accept.filter(a=>{ const patient=(get('analizgo_patients')||[]).find(p=>p.id===a.patientId); return (!name || (patient&&patient.name.toLowerCase().includes(name))) && (!date || a.date===date); });
-    uploadAnalysisSelect.innerHTML='<option value="">Выберите прием</option>';
-    filtered.forEach(a=>{ const patient=(get('analizgo_patients')||[]).find(p=>p.id===a.patientId); const opt=document.createElement('option'); opt.value=a.id; opt.textContent=patient?patient.name+' | '+a.date+' | '+a.type:''; uploadAnalysisSelect.appendChild(opt); });
-  }
-  uploadBtnUpload.onclick=()=>{
-    const analysisId=uploadAnalysisSelect.value; const file=uploadFileInput.files[0];
-    if(!analysisId || !file){ uploadMsg.textContent='Выберите прием и файл'; return; }
-    const accept=get('analizgo_analysis_accept'); const analysis=accept.find(a=>a.id===analysisId);
-    const results=get('analizgo_results'); results.push({id:'r'+Date.now(), patientId:analysis.patientId, doctorId:'', fileName:file.name, fileUrl:URL.createObjectURL(file), status:'ready', date:analysis.date});
-    set('analizgo_results',results); uploadMsg.textContent='Файл загружен'; renderAnalysisUpload(); uploadFileInput.value='';
-  }
+  document.getElementById('upload-btn').addEventListener('click',()=>{
+    const acceptId=document.getElementById('upload-analysis-select').value; const file=document.getElementById('upload-file').files[0];
+    if(!acceptId||!file){ alert('Выберите прием и файл'); return; }
+    const accept=get('analizgo_analysis_accept').find(a=>a.id==acceptId); const results=get('analizgo_results');
+    results.push({id:Date.now(),patientId:accept.patientId,fileName:file.name,status:'ready',date:accept.date,doctorId:''}); set('analizgo_results',results); renderAnalysisUpload(); renderResults();
+    document.getElementById('upload-msg').textContent='Файл загружен успешно';
+  });
 
-  // --- Результаты ---
-  const subReady=document.getElementById('sub-ready'); const subPending=document.getElementById('sub-pending');
-  const resultsTableBody=document.querySelector('#results-table tbody');
-  subReady.onclick=()=>{ subReady.classList.add('active'); subPending.classList.remove('active'); renderResults('ready'); };
-  subPending.onclick=()=>{ subPending.classList.add('active'); subReady.classList.remove('active'); renderResults('pending'); };
-  function renderResults(filter='ready'){
-    const results=get('analizgo_results'); const filtered=results.filter(r=>(filter==='ready'? r.status==='ready' : r.status!=='ready'));
-    resultsTableBody.innerHTML='';
-    filtered.slice().reverse().forEach(r=>{
-      const patient=(get('analizgo_patients')||[]).find(p=>p.id===r.patientId);
-      const tr=document.createElement('tr');
-      tr.innerHTML=`<td>${patient?patient.name:'—'}</td><td>${r.fileName}</td><td>${r.doctorId||''}</td><td>${r.status}</td><td>${r.date}</td>`;
-      tr.appendChild(createActionButtons(r,'results'));
-      resultsTableBody.appendChild(tr);
-    });
-  }
-
-  showView('accept');
+  // --- Инициализация ---
+  renderPatients(); renderDoctors(); renderAnalysisAccept(); renderAnalysisUpload(); renderResults();
 })();
 </script>
+
+
+<!-- Подключаем фронтенд скрипт -->
+<script src="appointment_admin.js"></script>
 </body>
 </html>
+
+
