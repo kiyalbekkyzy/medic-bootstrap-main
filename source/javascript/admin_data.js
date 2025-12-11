@@ -16,7 +16,6 @@ const pool = new Pool({
 });
 
 // ---------- ПАЦИЕНТЫ ----------
-
 app.get("/patients", async (req, res) => {
   const result = await pool.query("SELECT * FROM patients ORDER BY id DESC");
   res.json(result.rows);
@@ -32,7 +31,6 @@ app.post("/patients", async (req, res) => {
 });
 
 // ---------- ВРАЧИ ----------
-
 app.get("/doctors", async (req, res) => {
   const result = await pool.query("SELECT * FROM doctors ORDER BY id DESC");
   res.json(result.rows);
@@ -48,7 +46,6 @@ app.post("/doctors", async (req, res) => {
 });
 
 // ---------- ПРИЁМЫ ----------
-
 app.post("/analysis/accept", async (req, res) => {
   const { patient_id, doctor_id, date } = req.body;
   await pool.query(
@@ -69,8 +66,7 @@ app.get("/analysis/accept", async (req, res) => {
   res.json(result.rows);
 });
 
-// ---------- РЕЗУЛЬТАТЫ АНАЛИЗОВ ----------
-
+// ---------- РЕЗУЛЬТАТЫ ----------
 app.post("/analysis/upload", async (req, res) => {
   const { accept_id, result } = req.body;
   await pool.query(
